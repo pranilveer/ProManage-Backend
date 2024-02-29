@@ -45,41 +45,28 @@ router.put('/tasks/:taskId', authenticateUser, async (req, res) => {
   });
 
 // PUT route to update task status
-router.put('/tasks/:id/status', authenticateUser, async (req, res) => {
-    const taskId = req.params.id;
+router.put('/tasks/:taskId/status', async (req, res) => {
+    const taskId = req.params.taskId;
     const { status } = req.body;
 
     try {
         // Find the task by ID
-        const task = await Task.findByIdAndUpdate(taskId, { status }, { new: true });
+        const task = await Task.findById(taskId);
 
         if (!task) {
             return res.status(404).json({ error: 'Task not found' });
         }
 
+        // Update the task status
+        task.status = status;
+
+        // Save the updated task
+        await task.save();
+
         res.json({ message: 'Task status updated successfully', task });
     } catch (error) {
         console.error('Error updating task status:', error);
         res.status(500).json({ error: 'Server error' });
-    }
-});
-
-// GET route for the dashboard
-router.get('/dashboard', async (req, res) => {
-    try {
-        // Fetch tasks from the database
-        const tasks = await Task.find();
-
-        // Group tasks by status
-        const backlogTasks = tasks.filter(task => task.status === 'Backlog');
-        const progressTasks = tasks.filter(task => task.status === 'Progress');
-        const doneTasks = tasks.filter(task => task.status === 'Done');
-
-        // Send tasks to the client
-        res.status(200).json({ backlogTasks, progressTasks, doneTasks });
-    } catch (error) {
-        console.error('Error fetching tasks for dashboard:', error);
-        res.status(500).json({ message: 'Internal server error' });
     }
 });
 
