@@ -53,7 +53,7 @@ router.post("/users/login", async (req, res) => {
 
 router.put("/users/profile", authenticateUser, async (req, res) => {
   try {
-    const userId = req.user._id;
+    const userId = req.user._id; // Get the userId from the authenticated user
     const { oldPassword, newPassword } = req.body;
 
     // Find the user by ID
@@ -83,20 +83,17 @@ router.put("/users/profile", authenticateUser, async (req, res) => {
 });
 
 
-// Route to fetch user details by ID
-router.get("/users/:userId", authenticateUser, async (req, res) => {
+router.get('/users/:id', authenticateUser, async (req, res) => {
   try {
-    const userId = req.params.userId;
+    const userId = req.params.id;
     const user = await User.findById(userId);
     if (!user) {
-      return res.status(404).json({ error: "User not found" });
+      return res.status(404).json({ error: 'User not found' });
     }
-    // Return only the necessary user details (e.g., name)
-    const { name } = user;
-    res.status(200).json({ name });
+    res.status(200).json({ user });
   } catch (error) {
-    console.error("Error fetching user details:", error);
-    res.status(500).json({ error: "Internal server error" });
+    console.error('Error fetching user data:', error);
+    res.status(500).json({ error: 'Failed to fetch user data' });
   }
 });
 
